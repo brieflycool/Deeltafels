@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Miro's Magische Oefeningen</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
+  h1 { color: #333; font-size: 28px; margin-bottom: 20px; }
+  #vraag { font-size: 40px; margin: 20px; }
+  .keuze { display: inline-block; margin: 15px; font-size: 30px; padding: 15px 25px; background: #ddd; border-radius: 8px; cursor: pointer; }
+  .keuze:hover { background: #ccc; }
+  #feedback { font-size: 24px; margin: 15px; color: green; }
+  #voortgang-container { width: 80%; background: #ddd; margin: 20px auto; border-radius: 10px; overflow: hidden; }
+  #voortgang { height: 25px; width: 0; background: green; transition: width 0.3s; }
+</style>
+</head>
+<body>
+
+<h1>Miro's magische oefeningen 🧙‍♂️✨</h1>
+
+<div id="vraag"></div>
+
+<div id="keuzes"></div>
+
+<div id="voortgang-container">
+  <div id="voortgang"></div>
+</div>
+
+<div id="feedback"></div>
+
+<script>
+let deler, uitkomst, getal;
+let score = 0;
+const maxScore = 15;
+
+function nieuweSom() {
+  deler = Math.floor(Math.random() * 9) + 2;
+  uitkomst = Math.floor(Math.random() * 10) + 1;
+  getal = deler * uitkomst;
+  document.getElementById('vraag').textContent = `Wat is ${getal} ÷ ${deler} ?`;
+
+  let keuzes = [uitkomst];
+  while (keuzes.length < 3) {
+    let fout = Math.floor(Math.random() * 10) + 1;
+    if (!keuzes.includes(fout)) keuzes.push(fout);
+  }
+  keuzes.sort(() => 0.5 - Math.random()); // shuffle
+
+  let html = '';
+  keuzes.forEach(k => {
+    html += `<div class="keuze" onclick="controleer(${k})">${k}</div>`;
+  });
+  document.getElementById('keuzes').innerHTML = html;
+
+  document.getElementById('feedback').textContent = '';
+}
+
+function controleer(antwoord) {
+  if (antwoord === uitkomst) {
+    score++;
+    document.getElementById('feedback').textContent = '✅ Goed zo!';
+  } else {
+    score = Math.max(0, score - 1);
+    document.getElementById('feedback').textContent = `❌ Oei, het was ${uitkomst}`;
+  }
+
+  updateVoortgang();
+
+  if (score >= maxScore) {
+    document.getElementById('vraag').textContent = "WOW MIRO!!! Goed gedaan. Gemaakt door je papa.";
+    document.getElementById('keuzes').innerHTML = '';
+  } else {
+    setTimeout(nieuweSom, 1500);
+  }
+}
+
+function updateVoortgang() {
+  let percentage = (score / maxScore) * 100;
+  document.getElementById('voortgang').style.width = percentage + '%';
+}
+
+window.onload = nieuweSom;
+</script>
+
+</body>
+</html>
