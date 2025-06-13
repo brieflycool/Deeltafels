@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <title>Miro's Magische Oefeningen</title>
 <style>
   body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
@@ -30,10 +31,52 @@
 
 <script>
 let deler, uitkomst, getal;
+let deler2, getal2;
 let score = 0;
 const maxScore = 15;
+let level = 1;
+
+
+function vierFeest() {
+  // Confetti
+  confetti({
+    particleCount: 150,
+    spread: 100,
+    origin: { y: 0.6 }
+  });
+
+  // Boodschap
+  document.getElementById('vraag').innerHTML = `<strong>🎉 WOW MIRO!!! Goed gedaan. Gemaakt door je papa. 🧙‍♂️</strong>`;
+  document.getElementById('keuzes').innerHTML = '';
+
+  // Grappige afbeelding
+  const img = document.createElement('img');
+  img.src = "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif"; // Success Kid GIF
+  img.style.width = "300px";
+  img.style.marginTop = "30px";
+  document.body.appendChild(img);
+}
+
 
 function nieuweSom() {
+  if (score >= maxScore) {
+    vierFeest();
+    document.getElementById('keuzes').innerHTML = '';
+    return;
+  }
+
+  if (score >= maxScore / 2 && level === 1) {
+    level = 2;
+  }
+
+  if (level === 1) {
+    nieuweSomLevel1();
+  } else {
+    nieuweSomLevel2();
+  }
+}
+
+function nieuweSomLevel1() {
   deler = Math.floor(Math.random() * 9) + 2;
   uitkomst = Math.floor(Math.random() * 10) + 1;
   getal = deler * uitkomst;
@@ -44,14 +87,37 @@ function nieuweSom() {
     let fout = Math.floor(Math.random() * 10) + 1;
     if (!keuzes.includes(fout)) keuzes.push(fout);
   }
-  keuzes.sort(() => 0.5 - Math.random()); // shuffle
+  toonKeuzes(keuzes);
+}
 
+function nieuweSomLevel2() {
+  uitkomst = Math.floor(Math.random() * 10) + 1;
+  deler = Math.floor(Math.random() * 9) + 2;
+  getal = deler * uitkomst;
+
+  // Genereer een tweede som met hetzelfde uitkomst
+  do {
+    deler2 = Math.floor(Math.random() * 9) + 2;
+  } while (deler2 === deler);
+  getal2 = deler2 * uitkomst;
+
+  document.getElementById('vraag').innerHTML = `${getal} ÷ ${deler} = ?<br>${getal2} ÷ ${deler2} = ?`;
+
+  let keuzes = [uitkomst];
+  while (keuzes.length < 5) {
+    let fout = Math.floor(Math.random() * 10) + 1;
+    if (!keuzes.includes(fout)) keuzes.push(fout);
+  }
+  toonKeuzes(keuzes);
+}
+
+function toonKeuzes(keuzes) {
+  keuzes.sort(() => 0.5 - Math.random()); // shuffle
   let html = '';
   keuzes.forEach(k => {
     html += `<div class="keuze" onclick="controleer(${k})">${k}</div>`;
   });
   document.getElementById('keuzes').innerHTML = html;
-
   document.getElementById('feedback').textContent = '';
 }
 
@@ -65,13 +131,7 @@ function controleer(antwoord) {
   }
 
   updateVoortgang();
-
-  if (score >= maxScore) {
-    document.getElementById('vraag').textContent = "WOW MIRO!!! Goed gedaan. Gemaakt door je papa.";
-    document.getElementById('keuzes').innerHTML = '';
-  } else {
-    setTimeout(nieuweSom, 1500);
-  }
+  setTimeout(nieuweSom, 1500);
 }
 
 function updateVoortgang() {
@@ -81,6 +141,7 @@ function updateVoortgang() {
 
 window.onload = nieuweSom;
 </script>
+
 
 </body>
 </html>
