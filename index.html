@@ -7,73 +7,120 @@
 <style>
   body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
   h1 { color: #333; font-size: 40px; margin-bottom: 30px; }
-  #vraag { font-size: 60px; margin: 30px; }
-  .keuze { display: inline-block; margin: 20px; font-size: 45px; padding: 20px 30px; background: #ddd; border-radius: 12px; cursor: pointer; }
-  .keuze:hover { background: #ccc; }
-  #feedback { font-size: 36px; margin: 20px; color: green; }
+  #vraag { font-size: 60px; margin: 30px; min-height: 80px; }
+  .keuze { display: inline-block; margin: 20px; font-size: 45px; padding: 20px 30px; background: #ddd; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
+  .keuze:hover { background: #bbb; }
+  #feedback { font-size: 36px; margin: 20px; color: green; min-height: 40px; transition: opacity 0.3s; }
   #voortgang-container { width: 80%; background: #ddd; margin: 30px auto; border-radius: 12px; overflow: hidden; }
   #voortgang { height: 35px; width: 0; background: green; transition: width 0.3s; }
+  #grid { display: none; width: 420px; margin: 20px auto; }
+  .cell { display: inline-block; width: 38px; height: 38px; line-height: 38px; border: 1px solid #999; margin: 1px; cursor: pointer; user-select: none; transition: background 0.2s; }
+  .cell.highlight { background: green; color: white; }
+  .cell.wrong { background: red; color: white; }
+  .cell.blue { background: blue; color: white; }
+  #startmenu { margin-top: 40px; }
+  .menu-item { font-size: 30px; margin: 15px; cursor: pointer; padding: 10px 20px; background: #ccc; border-radius: 10px; display: inline-block; }
+  .menu-sub { margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <h1>Miro's magische oefeningen 🧙‍♂️✨</h1>
+<div id="terugknop" style="position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer; display: none;" onclick="gaTerug()">← Terug</div>
+<div id="startmenu">
+  <div class="menu-item" onclick="startToets()">Toets</div>
+  <div class="menu-item" onclick="toonSubmenu('normaal')">Normale oefening</div>
+  <div class="menu-item" onclick="toonSubmenu('moeilijk')">Moeilijke oefening</div>
 
-<div id="vraag"></div>
+  <div class="menu-sub" id="submenu-normaal" style="display:none">
+    <div class="menu-item" onclick="startLevel(1)">Level 1</div>
+    <div class="menu-item" onclick="startLevel(2)">Level 2</div>
+  </div>
 
-<div id="keuzes"></div>
-
-<div id="voortgang-container">
-  <div id="voortgang"></div>
+  <div class="menu-sub" id="submenu-moeilijk" style="display:none">
+    <div class="menu-item" onclick="startLevel(4)">Level 4</div>
+    <div class="menu-item" onclick="startLevel(5)">Level 5</div>
+  </div>
 </div>
 
+<div id="vraag" style="display:none"></div>
+<div id="keuzes"></div>
+<div id="grid"></div>
+<div id="voortgang-container" style="display:none">
+  <div id="voortgang"></div>
+</div>
 <div id="feedback"></div>
 
 <script>
+let toetsLevels = [1, 4, 5, 2];
+let toetsIndex = 0;
+let toetsRonde = 0;
+let inToets = false;
+
+function startToets() {
+  inToets = true;
+  toetsIndex = 0;
+  toetsRonde = 0;
+  score = 0;
+  maxScore = toetsLevels.length * 3; // 2 vragen per level
+  level = toetsLevels[toetsIndex];
+  document.getElementById('startmenu').style.display = 'none';
+  document.getElementById('vraag').style.display = 'block';
+  document.getElementById('voortgang-container').style.display = 'block';
+  document.getElementById('terugknop').style.display = 'block';
+
+  nieuweSom();
+}
+
 let deler, uitkomst, getal;
 let deler2, getal2;
+let tafel, multipleIndex, geselecteerd;
+let bonusTafel, bonusWaarden = [], blauweCel;
 let score = 0;
-const maxScore = 15;
+let maxScore = 15; // Maak het overschrijfbaar
 let level = 1;
 
+function toonSubmenu(soort) {
+  document.getElementById('submenu-normaal').style.display = soort === 'normaal' ? 'block' : 'none';
+  document.getElementById('submenu-moeilijk').style.display = soort === 'moeilijk' ? 'block' : 'none';
+}
+
+function startLevel(kiesLevel) {
+  level = kiesLevel;
+  score = 0;
+  document.getElementById('startmenu').style.display = 'none';
+  document.getElementById('vraag').style.display = 'block';
+  document.getElementById('voortgang-container').style.display = 'block';
+  document.getElementById('terugknop').style.display = 'block';
+  nieuweSom();
+}
 
 function vierFeest() {
-  // Confetti
-  confetti({
-    particleCount: 150,
-    spread: 100,
-    origin: { y: 0.6 }
-  });
-
-  // Boodschap
-  document.getElementById('vraag').innerHTML = `<strong>🎉 WOW MIRO!!! Goed gedaan. Gemaakt door je papa. 🧙‍♂️</strong>`;
+  confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+  document.getElementById('vraag').innerHTML = '<strong>🎉 MIRO! SUPER GOED GEDAAN! Ik ben trots op jou  🧙‍♂️</strong>';
   document.getElementById('keuzes').innerHTML = '';
-
-  // Grappige afbeelding
   const img = document.createElement('img');
-  img.src = "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif"; // Success Kid GIF
+  img.src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanZxY3k3bGNiYWpwYjZqbnNnc25rdnhyNmhqcGljMHh1N3h6MzhzcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/139eZBmH1HTyRa/giphy.gif";
   img.style.width = "300px";
   img.style.marginTop = "30px";
   document.body.appendChild(img);
 }
 
-
 function nieuweSom() {
-  if (score >= maxScore) {
-    vierFeest();
-    document.getElementById('keuzes').innerHTML = '';
-    return;
+  if (inToets) {
+  let vragenPerLevel = 2;
+  let totaalVragen = toetsLevels.length * vragenPerLevel;
+  if (score >= totaalVragen) return vierFeest();
+  let nieuwIndex = Math.floor(score / vragenPerLevel);
+  level = toetsLevels[nieuwIndex];
   }
 
-  if (score >= maxScore / 2 && level === 1) {
-    level = 2;
-  }
+  if (score >= maxScore && !inToets) return vierFeest();
 
-  if (level === 1) {
-    nieuweSomLevel1();
-  } else {
-    nieuweSomLevel2();
-  }
+  if (level === 1) nieuweSomLevel1();
+  else if (level === 2) nieuweSomLevel2();
+  else if (level === 4) nieuweSomLevel4();
+  else if (level === 5) nieuweSomLevel5();
 }
 
 function nieuweSomLevel1() {
@@ -81,7 +128,6 @@ function nieuweSomLevel1() {
   uitkomst = Math.floor(Math.random() * 10) + 1;
   getal = deler * uitkomst;
   document.getElementById('vraag').textContent = `${getal} ÷ ${deler} ?`;
-
   let keuzes = [uitkomst];
   while (keuzes.length < 3) {
     let fout = Math.floor(Math.random() * 10) + 1;
@@ -94,15 +140,9 @@ function nieuweSomLevel2() {
   uitkomst = Math.floor(Math.random() * 10) + 1;
   deler = Math.floor(Math.random() * 9) + 2;
   getal = deler * uitkomst;
-
-  // Genereer een tweede som met hetzelfde uitkomst
-  do {
-    deler2 = Math.floor(Math.random() * 9) + 2;
-  } while (deler2 === deler);
+  do { deler2 = Math.floor(Math.random() * 9) + 2; } while (deler2 === deler);
   getal2 = deler2 * uitkomst;
-
   document.getElementById('vraag').innerHTML = `${getal} ÷ ${deler} = ?<br>${getal2} ÷ ${deler2} = ?`;
-
   let keuzes = [uitkomst];
   while (keuzes.length < 5) {
     let fout = Math.floor(Math.random() * 10) + 1;
@@ -111,8 +151,120 @@ function nieuweSomLevel2() {
   toonKeuzes(keuzes);
 }
 
+function nieuweSomLevel4() {
+  tafel = Math.floor(Math.random() * 8) + 2;
+  multipleIndex = 2;
+  geselecteerd = 1;
+  document.getElementById('vraag').textContent = `klik op de tafel van ${tafel}`;
+  createGrid();
+  highlightCell(tafel);
+  document.getElementById('keuzes').innerHTML = '';
+  document.getElementById('grid').style.display = 'block';
+}
+
+function nieuweSomLevel5() {
+  bonusTafel = Math.floor(Math.random() * 8) + 2;
+  bonusWaarden = [];
+  createGrid();
+  for (let i = 1; i <= 10; i++) bonusWaarden.push(i * bonusTafel);
+  bonusWaarden.forEach((val, idx) => setTimeout(() => highlightCell(val), (idx + 1) * 200));
+  setTimeout(() => {
+    document.getElementById('vraag').textContent = `Welke tafel heb ik hier gemaakt?`;
+    let html = '';
+    for (let i = 2; i <= 9; i++) {
+      html += `<div class="keuze" onclick="controleerBonus(${i})">${i}</div>`;
+    }
+    document.getElementById('keuzes').innerHTML = html;
+  }, 2200);
+}
+
+function controleerBonus(antwoord) {
+  if (antwoord === bonusTafel) {
+    score++;
+    document.getElementById('feedback').textContent = '✅ Goed gegokt!';
+  } else {
+    score = Math.max(0, score - 1);
+    document.getElementById('feedback').textContent = `❌ Het was ${bonusTafel}`;
+  }
+  updateVoortgang();
+  blauweCel = getExtraCel(bonusTafel, bonusWaarden);
+  setTimeout(() => {
+    const cell = document.getElementById('cell' + blauweCel.number);
+    if (cell) cell.classList.add('blue');
+    document.getElementById('vraag').textContent = `Kan je ${blauweCel.number} delen door ${bonusTafel}?`;
+    let html = '';
+    ["Ja", "Nee"].forEach(antw => {
+      html += `<div class="keuze" onclick="controleerJaNee('${antw}')">${antw}</div>`;
+    });
+    document.getElementById('keuzes').innerHTML = html;
+  }, 1500);
+}
+
+function getExtraCel(tafel, uitgesloten) {
+  let opties = [];
+  for (let i = 1; i <= 100; i++) {
+    if (!uitgesloten.includes(i)) opties.push({ number: i, isDivisible: i % tafel === 0 });
+  }
+  return opties[Math.floor(Math.random() * opties.length)];
+}
+
+function controleerJaNee(antwoord) {
+  const juist = (antwoord === 'Ja' && blauweCel.isDivisible) || (antwoord === 'Nee' && !blauweCel.isDivisible);
+  const cell = document.getElementById('cell' + blauweCel.number);
+  if (juist) {
+    score++;
+    document.getElementById('feedback').textContent = '✅ Klopt!';
+    if (cell) cell.classList.add('highlight');
+  } else {
+    score = Math.max(0, score - 1);
+    document.getElementById('feedback').textContent = '❌ Niet juist.';
+    if (cell) cell.classList.add('wrong');
+  }
+updateVoortgang();
+document.getElementById('grid').style.display = 'none';
+setTimeout(nieuweSom, 1500);
+}
+
+function createGrid() {
+  const grid = document.getElementById('grid');
+  let html = '';
+  for (let i = 1; i <= 100; i++) {
+    const content = (level === 5 && i <= 10) ? '' : i;
+    html += `<div class="cell" id="cell${i}" onclick="klikCell(${i})">${content}</div>`;
+    if (i % 10 === 0) html += '<br>';
+  }
+  grid.innerHTML = html;
+  document.getElementById('grid').style.display = 'block';
+}
+
+function highlightCell(num) {
+  const cell = document.getElementById('cell' + num);
+  if (cell) cell.classList.add('highlight');
+}
+
+function klikCell(num) {
+  if (level !== 4) return;
+  if (num === tafel * multipleIndex) {
+    highlightCell(num);
+    geselecteerd++;
+    multipleIndex++;
+    if (geselecteerd >= 10) {
+      document.getElementById('grid').style.display = 'none';
+      score++;
+      updateVoortgang();
+      setTimeout(nieuweSom, 700);
+    }
+  } else {
+    const cell = document.getElementById('cell' + num);
+    if (cell) {
+      cell.classList.add('wrong');
+      setTimeout(() => cell.classList.remove('wrong'), 400);
+    }
+  }
+}
+
 function toonKeuzes(keuzes) {
-  keuzes.sort(() => 0.5 - Math.random()); // shuffle
+  keuzes.sort(() => 0.5 - Math.random());
   let html = '';
   keuzes.forEach(k => {
     html += `<div class="keuze" onclick="controleer(${k})">${k}</div>`;
@@ -129,19 +281,25 @@ function controleer(antwoord) {
     score = Math.max(0, score - 1);
     document.getElementById('feedback').textContent = `❌ Oei, het was ${uitkomst}`;
   }
-
   updateVoortgang();
-  setTimeout(nieuweSom, 1500);
+  setTimeout(nieuweSom, 800);
 }
 
 function updateVoortgang() {
   let percentage = (score / maxScore) * 100;
   document.getElementById('voortgang').style.width = percentage + '%';
 }
-
-window.onload = nieuweSom;
+function gaTerug() {
+  document.getElementById('startmenu').style.display = 'block';
+  document.getElementById('vraag').style.display = 'none';
+  document.getElementById('voortgang-container').style.display = 'none';
+  document.getElementById('keuzes').innerHTML = '';
+  document.getElementById('grid').style.display = 'none';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('terugknop').style.display = 'none';
+  inToets = false;
+}
 </script>
-
 
 </body>
 </html>
