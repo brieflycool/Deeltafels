@@ -136,7 +136,9 @@ function nieuweSom() {
 }
 
 function nieuweSomLevel1() {
-  deler = Math.floor(Math.random() * 9) + 2;
+  // Kies een deler tussen 3 en 9, maar geen 10
+  let mogelijkeDelers = [3, 4, 5, 6, 7, 8, 9];
+  deler = mogelijkeDelers[Math.floor(Math.random() * mogelijkeDelers.length)];
   uitkomst = Math.floor(Math.random() * 10) + 1;
   getal = deler * uitkomst;
   document.getElementById('vraag').textContent = `${getal} ÷ ${deler} ?`;
@@ -149,12 +151,21 @@ function nieuweSomLevel1() {
 }
 
 function nieuweSomLevel2() {
+  let mogelijkeDelers = [3, 4, 5, 6, 7, 8, 9];
   uitkomst = Math.floor(Math.random() * 10) + 1;
-  deler = Math.floor(Math.random() * 9) + 2;
+
+  // Eerste deler
+  deler = mogelijkeDelers[Math.floor(Math.random() * mogelijkeDelers.length)];
+
+  // Tweede deler, anders dan de eerste
+  do {
+    deler2 = mogelijkeDelers[Math.floor(Math.random() * mogelijkeDelers.length)];
+  } while (deler2 === deler);
+
   getal = deler * uitkomst;
-  do { deler2 = Math.floor(Math.random() * 9) + 2; } while (deler2 === deler);
   getal2 = deler2 * uitkomst;
   document.getElementById('vraag').innerHTML = `${getal} ÷ ${deler} = ?<br>${getal2} ÷ ${deler2} = ?`;
+
   let keuzes = [uitkomst];
   while (keuzes.length < 5) {
     let fout = Math.floor(Math.random() * 10) + 1;
@@ -162,6 +173,7 @@ function nieuweSomLevel2() {
   }
   toonKeuzes(keuzes);
 }
+
 
 function nieuweSomLevel4() {
   tafel = Math.floor(Math.random() * 8) + 2;
