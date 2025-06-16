@@ -99,11 +99,23 @@ function vierFeest() {
   confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
   document.getElementById('vraag').innerHTML = '<strong>🎉 MIRO! SUPER GOED GEDAAN! Ik ben trots op jou  🧙‍♂️</strong>';
   document.getElementById('keuzes').innerHTML = '';
+const gifUrls = [
+  "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif",
+  "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanZxY3k3bGNiYWpwYjZqbnNnc25rdnhyNmhqcGljMHh1N3h6MzhzcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/139eZBmH1HTyRa/giphy.gif",
+  "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWg3ZnYyZDBtcTFibWxpdmtpMXJzZ2xuaWltZ3htcHhnZ3NhaHQyMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HyanD1KpfzPiw/giphy.gif",
+  "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnBmc243bG9jY3B5aXE3aG5ocHY3b3l5eGZzMDl2aWJtdzVjNm9qYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BQso6EW8N8CpDCpTe8/giphy.gif",
+  "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmNheno2eHJmMnRheXQzM2xyYWp3dzY4aGtjYmE2cDN6cjIwc3R5ZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l41lYCDgxP6OFBruE/giphy.gif",
+  "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2xhc3k5c3VqamlhbjJidWQ2bDMyc2pybmV3MmpobTk5ZHpvZGloOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IMDSOJvLn9RaU/giphy.gif"
+];
+
+gifUrls.forEach(url => {
   const img = document.createElement('img');
-  img.src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanZxY3k3bGNiYWpwYjZqbnNnc25rdnhyNmhqcGljMHh1N3h6MzhzcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/139eZBmH1HTyRa/giphy.gif";
-  img.style.width = "300px";
-  img.style.marginTop = "30px";
+  img.src = url;
+  img.style.width = "200px";
+  img.style.margin = "10px";
   document.body.appendChild(img);
+});
+
 }
 
 function nieuweSom() {
